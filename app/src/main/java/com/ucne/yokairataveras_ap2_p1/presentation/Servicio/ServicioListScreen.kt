@@ -160,7 +160,7 @@ fun ServicioListBody(
 
 @Preview
 @Composable
-fun TecnicoListPreview() {
+fun ServicioListPreview() {
     val servicios = listOf(
         ServicioEntity(
             servicioId = 1,
