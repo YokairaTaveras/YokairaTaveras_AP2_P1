@@ -121,5 +121,4 @@ fun ServicioUIState.toEntity() = ServicioEntity(
     servicioId = servicioId,
     descripcion = descripcion,
     precio = precio,
-
 )
