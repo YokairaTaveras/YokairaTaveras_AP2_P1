@@ -85,8 +85,7 @@ fun ServicioListBody(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text ="Id", modifier = Modifier.weight(0.10f))
-                Text(text = "Servicio", modifier = Modifier.weight(0.300f))
-                Text(text = "Descripcion", modifier = Modifier.weight(0.30f))
+                Text(text = "Descripción", modifier = Modifier.weight(0.30f))
                 Text(text = "Precio", modifier = Modifier.weight(0.20f))
             }
             LazyColumn(
@@ -167,6 +166,7 @@ fun ServicioListPreview() {
             descripcion = "Primer parcial",
             precio = 100.0
         )
+
     )
 
 

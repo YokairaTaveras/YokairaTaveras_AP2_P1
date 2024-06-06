@@ -4,44 +4,50 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
+import com.ucne.yokairataveras_ap2_p1.data.local.database.ServicioDb
+import com.ucne.yokairataveras_ap2_p1.presentation.components.DrawerNavigation
 import com.ucne.yokairataveras_ap2_p1.presentation.navigation.Parcial1NavHost
+import com.ucne.yokairataveras_ap2_p1.presentation.navigation.Screen
+import com.ucne.yokairataveras_ap2_p1.repository.ServicioRepository
 import com.ucne.yokairataveras_ap2_p1.ui.theme.YokairaTaveras_AP2_P1Theme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private lateinit var servicioDb: ServicioDb
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        servicioDb = Room.databaseBuilder(
+            this,
+            ServicioDb::class.java,
+            "servicio.db"
+        )
+            .fallbackToDestructiveMigration()
+            .build()
+        val repository = ServicioRepository(servicioDb.servicioDao())
         enableEdgeToEdge()
         setContent {
 
             YokairaTaveras_AP2_P1Theme {
                 val navHost = rememberNavController()
-                Parcial1NavHost(navHost)
+                val scope = rememberCoroutineScope()
+                var drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+                DrawerNavigation(
+                    drawerState = drawerState,
+                    navToServicioList = {navHost.navigate(Screen.ServicioListScreen)},
+                    closeDrawer = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    },
+                )
+                Parcial1NavHost(navHost,repository, scope, drawerState)
 
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    YokairaTaveras_AP2_P1Theme {
-        Greeting("Android")
     }
 }
