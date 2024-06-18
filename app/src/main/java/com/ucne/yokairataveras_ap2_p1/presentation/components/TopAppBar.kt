@@ -12,7 +12,7 @@ import androidx.compose.ui.text.style.TextOverflow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBar(title: String, openDrawer: () -> Unit) {
+fun TopAppBar(title: String) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -22,7 +22,7 @@ fun TopAppBar(title: String, openDrawer: () -> Unit) {
             )
         },
         navigationIcon = {
-            IconButton(onClick = { openDrawer() }) {
+            IconButton(onClick = { /* openDrawer() */}) {
                 Icon(
                     imageVector = Icons.Filled.Menu,
                     contentDescription = "Localized description"
