@@ -3,19 +3,25 @@ package com.ucne.yokairataveras_ap2_p1.presentation.Servicio
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ucne.yokairataveras_ap2_p1.data.local.entities.ServicioEntity
-import com.ucne.yokairataveras_ap2_p1.repository.ServicioRepository
+import com.ucne.yokairataveras_ap2_p1.data.local.remote.dto.PersonaDto
+import com.ucne.yokairataveras_ap2_p1.data.local.repository.PersonaRepository
+import com.ucne.yokairataveras_ap2_p1.data.local.repository.Resource
+import com.ucne.yokairataveras_ap2_p1.data.local.repository.ServicioRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
-class ServicioViewModel(
+@HiltViewModel
+class ServicioViewModel @Inject constructor (
     private val servicioRepository: ServicioRepository,
-    private val servicioId: Int,
+    private val personaRepository: PersonaRepository
 ) : ViewModel() {
-
+    private var servicioId: Int = 0
     var uiState = MutableStateFlow(ServicioUIState())
         private set
 
@@ -39,6 +45,7 @@ class ServicioViewModel(
             it.copy(precio = numeros)
         }
     }
+
     init {
         viewModelScope.launch {
             val servicio = servicioRepository.getServicio(servicioId)
@@ -52,6 +59,7 @@ class ServicioViewModel(
                         )
                 }
             }
+            getPersona()
         }
     }
 
@@ -77,6 +85,7 @@ class ServicioViewModel(
             servicioRepository.deleteServicio(uiState.value.toEntity())
         }
     }
+
 
 
     fun Validar(): Boolean {
@@ -107,7 +116,41 @@ class ServicioViewModel(
 
         return !descripcionVacia && !precioVacio
     }
+
+    fun getPersona() {
+        viewModelScope.launch {
+            personaRepository.getPersona().collect { result ->
+                when (result) {
+                    is Resource.Loading -> {
+                        uiState.update {
+                            it.copy(isLoading = true)
+                        }
+
+                    }
+
+                    is Resource.Success -> {
+                        uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                persona = result.data ?: emptyList()
+                            )
+                        }
+                    }
+
+                    is Resource.Error -> {
+                        uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = result.message
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
+
 
 data class ServicioUIState(
     val servicioId: Int? = null,
@@ -115,6 +158,9 @@ data class ServicioUIState(
     var descripcionError: String? = null,
     val precio: Double? = null,
     var precioError: String? = null,
+    val persona: List<PersonaDto> = emptyList(),
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
 )
 
 fun ServicioUIState.toEntity() = ServicioEntity(

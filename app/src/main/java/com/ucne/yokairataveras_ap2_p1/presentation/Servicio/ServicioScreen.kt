@@ -33,16 +33,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ucne.yokairataveras_ap2_p1.ui.theme.YokairaTaveras_AP2_P1Theme
-import kotlin.reflect.KFunction1
 
 
 @Composable
 fun ServicioScreen(
-    viewModel: ServicioViewModel,
-    goToServicioList: () -> Unit,
-    openDrawer: () -> Unit
+    viewModel: ServicioViewModel = hiltViewModel(),
+    goToServicioList: () -> Unit
 ) {
 
     val Servicio by viewModel.servicio.collectAsStateWithLifecycle()
@@ -61,7 +60,7 @@ fun ServicioScreen(
         },
         onDescripcionChanged = viewModel::onDescripcionChanged,
         onPrecioChanged = viewModel::onPrecioChanged,
-        openDrawer = openDrawer
+
     )
 }
 
@@ -70,23 +69,12 @@ fun ServicioScreen(
 private fun ServicioBody(
     uiState: ServicioUIState,
     onSaveServicio: () -> Boolean,
-    openDrawer: () -> Unit,
     goToServicioList: () -> Unit,
     onDeleteServicio: () -> Unit = {},
     onDescripcionChanged: (String) -> Unit,
     onNewServicio: () -> Unit,
     onPrecioChanged: (String) -> Unit,
 ) {
-    var showDatePicker by remember { mutableStateOf(false) }
-    val unDia = 86400000
-
-    val state = rememberDatePickerState(selectableDates = object : SelectableDates {
-        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-            return utcTimeMillis <= System.currentTimeMillis() - unDia
-        }
-    })
-
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -196,7 +184,6 @@ private fun ServicioPreview() {
         ServicioBody(
             uiState = ServicioUIState(),
             onSaveServicio = { true },
-            openDrawer = {},
             goToServicioList = {},
             onDeleteServicio = {},
             onDescripcionChanged = {},

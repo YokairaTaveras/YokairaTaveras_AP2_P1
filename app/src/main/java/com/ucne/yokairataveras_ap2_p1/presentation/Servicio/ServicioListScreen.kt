@@ -3,8 +3,10 @@ package com.ucne.yokairataveras_ap2_p1.presentation.Servicio
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,34 +30,64 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ucne.yokairataveras_ap2_p1.data.local.entities.ServicioEntity
-import com.ucne.yokairataveras_ap2_p1.presentation.components.FloatingButton
 import com.ucne.yokairataveras_ap2_p1.presentation.components.TopAppBar
 import com.ucne.yokairataveras_ap2_p1.ui.theme.YokairaTaveras_AP2_P1Theme
 
 @Composable
 fun ServicioListScreen(
-    viewModel: ServicioViewModel,
+    viewModel: ServicioViewModel = hiltViewModel(),
     onVerServicio: (ServicioEntity) -> Unit,
     onAddServicio: () -> Unit,
-    openDrawer: () -> Unit,
 ) {
     val servicios by viewModel.servicio.collectAsStateWithLifecycle()
-    ServicioListBody(
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Spacer(modifier = Modifier.height(32.dp))
+
+        TextButton(
+            onClick = { viewModel.getPersona() }
+        ) {
+            Text(text = "Get Persona")
+        }
+
+        if (uiState.isLoading) {
+            CircularProgressIndicator()
+        }
+
+        uiState.errorMessage?.let {
+            Text(text = it, color = Color.Red)
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(uiState.persona) { usuario ->
+                Text(text = usuario.personaId.toString())
+                Text(text = usuario.nombre)
+                Text(text = usuario.apellido)
+                Text(text = usuario.direccion)
+            }
+        }
+    }
+    /*ServicioListBody(
         servicios = servicios,
         onVerServicio = onVerServicio,
         onEliminarServicio = { viewModel.deleteServicio() },
-        onAddServicio = onAddServicio,
-        openDrawer = openDrawer
-    )
+        onAddServicio = onAddServicio
+
+    )*/
 }
 
 @Composable
 fun ServicioListBody(
     servicios: List<ServicioEntity>,
     onVerServicio: (ServicioEntity) -> Unit,
-    openDrawer: () -> Unit,
     onEliminarServicio: () -> Unit,
     onAddServicio: () -> Unit
 ) {
@@ -62,14 +95,9 @@ fun ServicioListBody(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = "Lista de Servicios",
-                openDrawer = openDrawer
+                title = "Lista de Servicios"
             )
-        },
-        floatingActionButton = {
-            FloatingButton(onAddServicio)
-        }
-    ) { innerPadding ->
+        }) { innerPadding ->
         var showDitailsDialog by remember { mutableStateOf(false) }
         var selectedItem by remember { mutableStateOf<ServicioEntity?>(null) }
         Column(
@@ -174,7 +202,6 @@ fun ServicioListPreview() {
         ServicioListBody(
             servicios = servicios,
             onVerServicio = {},
-            openDrawer = {},
             onEliminarServicio = {},
             onAddServicio = {},
         )

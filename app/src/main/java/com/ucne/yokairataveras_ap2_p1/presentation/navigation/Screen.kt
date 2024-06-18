@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 
 sealed class Screen {
-    @kotlinx.serialization.Serializable
+    @Serializable
     class Servicio(val servicioId: Int) : Screen()
 
     @Serializable
